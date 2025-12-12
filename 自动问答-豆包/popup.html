@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body {
+            width: 350px;
+            padding: 15px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .header {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        .input-group {
+            margin-bottom: 12px;
+        }
+        label {
+            display: block;
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        textarea {
+            width: 100%;
+            height: 80px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 12px;
+            resize: vertical;
+        }
+        .button-group {
+            display: flex;
+            gap: 8px;
+            margin-top: 15px;
+        }
+        button {
+            flex: 1;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .start-btn {
+            background: #4CAF50;
+            color: white;
+        }
+        .start-btn:hover {
+            background: #45a049;
+        }
+        .stop-btn {
+            background: #f44336;
+            color: white;
+        }
+        .stop-btn:hover {
+            background: #da190b;
+        }
+        .status {
+            margin-top: 10px;
+            padding: 8px;
+            background: #f0f0f0;
+            border-radius: 4px;
+            font-size: 11px;
+            color: #666;
+        }
+        .item-input {
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">自动对话助手</div>
+    
+    <div class="input-group">
+        <label>对话内容列表（每行一个）</label>
+        <textarea id="itemList" placeholder="想买 AI 眼镜，应该怎么选？哪几个产品最值得买？&#10;不同品牌的 AI 眼镜体验差异在哪里？"></textarea>
+    </div>
+    
+    <div class="input-group">
+        <label>循环次数</label>
+        <input type="number" id="loopCount" value="1" min="1" max="99" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+    </div>
+    
+    <div class="button-group">
+        <button id="startBtn" class="start-btn">开始执行</button>
+        <button id="stopBtn" class="stop-btn">停止</button>
+    </div>
+    
+    <div id="status" class="status">等待开始...</div>
+    
+    <script src="popup.js"></script>
+</body>
+</html>
