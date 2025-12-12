@@ -1,0 +1,12 @@
+{
+  "manifest_version": 3,
+  "name": "时间转换器",
+  "version": "1.4",
+  "description": "时间戳与日期时间实时双向转换工具",
+  "action": {
+    "default_popup": "popup.html",
+    "default_width": 800,
+    "default_height": 600
+  },
+  "permissions": []
+}
