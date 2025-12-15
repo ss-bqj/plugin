@@ -97,7 +97,10 @@ async function executeAutomation() {
 
 // 步骤1: 点击"开启新对话"
 async function clickNewChatButton() {
-    const selector = ".section-item-title-K023pw";
+    // 非登录的元素定位
+    // const selector = 'div.flex-1.grow.text-14.leading-22.font-semibold.select-none'; 
+    // 登录的元素定位
+    const selector = ".section-item-title-K023pw"; 
     updateStatus('正在查找"开启新对话"按钮...');
     
     const button = await waitForElement(selector);
