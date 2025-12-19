@@ -3,7 +3,11 @@ const itemListTextarea = document.getElementById('itemList');
 const loopCountInput = document.getElementById('loopCount');
 const startBtn = document.getElementById('startBtn');
 const stopBtn = document.getElementById('stopBtn');
+const downloadBtn = document.getElementById('downloadBtn');
 const statusDiv = document.getElementById('status');
+
+// 存储对话数据
+let conversationsData = [];
 
 // 初始化：从storage加载保存的数据
 chrome.storage.local.get(['itemList', 'loopCount'], (result) => {
@@ -45,6 +49,10 @@ startBtn.addEventListener('click', async () => {
     
     const loopCount = parseInt(loopCountInput.value) || 1;
     
+    // 重置数据
+    conversationsData = [];
+    downloadBtn.disabled = true;
+    
     // 获取当前活动标签页
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     
@@ -79,11 +87,48 @@ stopBtn.addEventListener('click', async () => {
     }
 });
 
+// 下载JSON文件
+downloadBtn.addEventListener('click', async () => {
+    if (conversationsData.length === 0) {
+        alert('暂无数据可下载！');
+        return;
+    }
+    
+    try {
+        // 生成JSON文件
+        const jsonData = JSON.stringify(conversationsData, null, 2);
+        const blob = new Blob([jsonData], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        
+        // 创建下载链接
+        const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+        const filename = `对话记录_${timestamp}.json`;
+        
+        // 使用Chrome下载API
+        await chrome.downloads.download({
+            url: url,
+            filename: filename,
+            saveAs: true
+        });
+        
+        updateStatus(`✅ JSON文件已准备下载: ${filename}`);
+    } catch (error) {
+        updateStatus(`❌ 下载失败: ${error.message}`);
+        alert('下载失败: ' + error.message);
+    }
+});
+
 // 监听来自content script的消息
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.type === 'statusUpdate') {
         updateStatus(message.text);
     } else if (message.type === 'taskComplete') {
         updateStatus('✅ 所有任务已完成！');
+        // 启用下载按钮
+        if (message.conversations && message.conversations.length > 0) {
+            conversationsData = message.conversations;
+            downloadBtn.disabled = false;
+            updateStatus(`✅ 任务完成！可下载 ${conversationsData.length} 条对话记录`);
+        }
     }
 });

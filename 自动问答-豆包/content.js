@@ -4,6 +4,7 @@ let currentItemIndex = 0;
 let currentLoop = 0;
 let items = [];
 let loopCount = 1;
+let allConversations = []; // 新增：存储所有对话数据
 
 // 辅助函数：等待元素出现
 function waitForElement(selector, timeout = 10000) {
@@ -48,6 +49,43 @@ function updateStatus(text) {
     });
 }
 
+// 新增函数：等待并获取AI回复
+async function waitForResponse(inputText, timeout = 30000) {
+    const responseSelector = 'div[data-testid="message_text_content"]';
+    updateStatus('等待AI回复...');
+    
+    try {
+        // 等待回复出现，先等待1秒确保消息发送完成
+        await sleep(1000);
+        
+        // 等待至少2条消息（用户消息和AI回复）
+        let messages = [];
+        let attempts = 0;
+        const maxAttempts = timeout / 1000;
+        
+        while (messages.length < 2 && attempts < maxAttempts) {
+            messages = document.querySelectorAll(responseSelector);
+            if (messages.length >= 2) {
+                // 获取最后一条消息作为AI回复
+                const lastMessage = messages[messages.length - 1];
+                return lastMessage.textContent.trim();
+            }
+            await sleep(1000);
+            attempts++;
+        }
+        
+        // 如果超时，尝试获取最后一条
+        if (messages.length > 0) {
+            const lastMessage = messages[messages.length - 1];
+            return lastMessage.textContent.trim();
+        }
+        
+        return '[等待回复超时]';
+    } catch (error) {
+        return `[获取回复出错: ${error.message}]`;
+    }
+}
+
 // 主执行流程
 async function executeAutomation() {
     if (!isRunning) return;
@@ -75,9 +113,24 @@ async function executeAutomation() {
                 
                 // 步骤3: 点击发送
                 await clickSendButton();
-                await sleep(2000); // 等待响应
                 
-                // 步骤4: 等待一段时间再继续
+                // 步骤4: 等待AI回复
+                const responseText = await waitForResponse(item);
+                updateStatus(`✓ 收到回复: ${responseText.substring(0, 30)}...`);
+                
+                // 步骤5: 保存对话数据
+                const conversation = {
+                    input: item,
+                    output: responseText,
+                    loop: currentLoop,
+                    itemIndex: i + 1,
+                    timestamp: new Date().toLocaleString('zh-CN'),
+                    totalLoops: loopCount,
+                    totalItems: items.length
+                };
+                allConversations.push(conversation);
+                
+                // 步骤6: 等待一段时间再继续
                 await sleep(3000);
             }
             
@@ -86,7 +139,10 @@ async function executeAutomation() {
         
         isRunning = false;
         updateStatus('✅ 所有任务已完成！');
-        chrome.runtime.sendMessage({ type: 'taskComplete' });
+        chrome.runtime.sendMessage({ 
+            type: 'taskComplete',
+            conversations: allConversations  // 发送所有对话数据
+        });
         
     } catch (error) {
         console.error('执行出错:', error);
@@ -97,9 +153,6 @@ async function executeAutomation() {
 
 // 步骤1: 点击"开启新对话"
 async function clickNewChatButton() {
-    // 非登录的元素定位
-    // const selector = 'div.flex-1.grow.text-14.leading-22.font-semibold.select-none'; 
-    // 登录的元素定位
     const selector = ".section-item-title-K023pw"; 
     updateStatus('正在查找"开启新对话"按钮...');
     
@@ -167,7 +220,7 @@ async function clickSendButton() {
     updateStatus('✓ 已点击发送');
     
     // 额外等待确认发送
-    await sleep(20*1000);
+    await sleep(35*1000);
 }
 
 // 监听来自popup的消息
@@ -178,11 +231,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             return;
         }
         
+        // 重置数据
         isRunning = true;
         items = message.items;
         loopCount = message.loopCount || 1;
         currentItemIndex = 0;
         currentLoop = 0;
+        allConversations = []; // 清空历史数据
         
         updateStatus(`收到任务，共 ${items.length} 个项目`);
         executeAutomation();
@@ -190,5 +245,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     } else if (message.action === 'stopAutomation') {
         isRunning = false;
         updateStatus('⏹️ 任务已停止');
+    } else if (message.action === 'getConversations') {
+        // 新增：返回对话数据
+        sendResponse({ conversations: allConversations });
     }
+    
+    return true; // 保持消息通道开放
 });
