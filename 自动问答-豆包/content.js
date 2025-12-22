@@ -131,6 +131,85 @@ async function waitForResponse(inputText, timeout = 60000) {
     }
 }
 
+// ==================== 新增功能：获取参考资料 ====================
+// 获取参考资料信息（在AI回复完成后调用）
+async function getReferenceSources() {
+    const sources = [];
+    
+    try {
+        // 1. 等待参考资料按钮出现
+        updateStatus('正在查找参考资料按钮...');
+        const refButton = await waitForElement('span.entry-btn-title-a8ozJq.entry-btn-title', 8000);
+        
+        if (!refButton) {
+            updateStatus('⚠️ 未找到参考资料按钮，跳过');
+            return [];
+        }
+        
+        // 2. 点击按钮打开资料面板
+        refButton.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        await sleep(500);
+        refButton.click();
+        updateStatus('✓ 已打开参考资料面板');
+        
+        // 3. 等待面板完全渲染
+        await sleep(3000);
+        
+        // 4. 直接查找所有资料链接（你给的精确class！）
+        const linkElements = document.querySelectorAll('a.search-lIUYwC[href^="http"]');
+        
+        if (linkElements.length === 0) {
+            updateStatus('⚠️ 未找到任何资料链接');
+            return [];
+        }
+        
+        updateStatus(`✓ 找到 ${linkElements.length} 篇参考资料，开始提取...`);
+        
+        // 5. 遍历每个链接，在链接内部提取标题、摘要、来源
+        for (let index = 0; index < linkElements.length; index++) {
+            try {
+                const linkEl = linkElements[index];
+                
+                // 在链接内部查找（相对路径，不会错位）
+                const titleEl = linkEl.querySelector('.search-item-title-fLDLZw');
+                const summaryEl = linkEl.querySelector('.search-item-summary-uNyUB_');
+                const sourceNameEl = linkEl.querySelector('.footer-title-M1Yzgt');
+                
+                // 必须包含标题
+                if (titleEl) {
+                    const sourceInfo = {
+                        cite_num: String(index + 1),
+                        source_name: sourceNameEl ? sourceNameEl.textContent.trim() : '未知来源',
+                        pulish_time: '', // 你要求为空
+                        link_url: linkEl.href,
+                        title: titleEl.textContent.trim(),
+                        summary: summaryEl ? summaryEl.textContent.trim() : '无摘要'
+                    };
+                    sources.push(sourceInfo);
+                    console.log(`[Source ${index + 1}/${linkElements.length}] ✅ 提取: ${sourceInfo.title.substring(0, 50)}...`);
+                } else {
+                    console.warn(`[Source ${index + 1}] ❌ 未找到标题，跳过`);
+                }
+            } catch (itemError) {
+                console.warn(`提取第 ${index + 1} 个资料项失败:`, itemError);
+            }
+        }
+        
+        // 6. 关闭资料面板
+        await sleep(300);
+        document.body.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        
+        updateStatus(`✓ 参考资料提取完成，成功 ${sources.length} 条`);
+        return sources;
+        
+    } catch (error) {
+        updateStatus(`⚠️ 获取参考资料失败: ${error.message}`);
+        console.error('获取参考资料出错:', error);
+        return [];
+    }
+}
+// ==================== 新增功能结束 ====================
+
 // 主执行流程
 async function executeAutomation() {
     if (!isRunning) return;
@@ -158,6 +237,11 @@ async function executeAutomation() {
                 const responseText = await waitForResponse(item);
                 updateStatus(`✓ 收到回复: ${responseText.substring(0, 30)}...`);
                 
+                // ==================== 关键修改点 ====================
+                // 在AI回复完成后，获取参考资料
+                const sourceEntities = await getReferenceSources();
+                // ===================================================
+                
                 const conversation = {
                     input: item,
                     output: responseText,
@@ -165,7 +249,8 @@ async function executeAutomation() {
                     itemIndex: i + 1,
                     timestamp: new Date().toLocaleString('zh-CN'),
                     totalLoops: loopCount,
-                    totalItems: items.length
+                    totalItems: items.length,
+                    source_entity: sourceEntities // 新增字段
                 };
                 allConversations.push(conversation);
                 
