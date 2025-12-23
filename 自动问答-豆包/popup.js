@@ -4,6 +4,7 @@ const loopCountInput = document.getElementById('loopCount');
 const startBtn = document.getElementById('startBtn');
 const stopBtn = document.getElementById('stopBtn');
 const downloadBtn = document.getElementById('downloadBtn');
+const downloadExcelBtn = document.getElementById('downloadExcelBtn');
 const statusDiv = document.getElementById('status');
 
 // 存储对话数据
@@ -52,6 +53,7 @@ startBtn.addEventListener('click', async () => {
     // 重置数据
     conversationsData = [];
     downloadBtn.disabled = true;
+    downloadExcelBtn.disabled = true;
     
     // 获取当前活动标签页
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -95,16 +97,13 @@ downloadBtn.addEventListener('click', async () => {
     }
     
     try {
-        // 生成JSON文件
         const jsonData = JSON.stringify(conversationsData, null, 2);
         const blob = new Blob([jsonData], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         
-        // 创建下载链接
         const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
         const filename = `对话记录_${timestamp}.json`;
         
-        // 使用Chrome下载API
         await chrome.downloads.download({
             url: url,
             filename: filename,
@@ -118,16 +117,76 @@ downloadBtn.addEventListener('click', async () => {
     }
 });
 
+// 下载Excel文件
+downloadExcelBtn.addEventListener('click', async () => {
+    if (conversationsData.length === 0) {
+        alert('暂无数据可下载！');
+        return;
+    }
+    
+    try {
+        updateStatus('正在生成Excel文件...');
+        
+        // 准备Excel数据（扁平化结构）
+        const excelData = conversationsData.map((conv, index) => {
+            // 处理参考资料，转换为文本
+            const sources = conv.source_entity || [];
+            const sourcesText = sources.map(s => 
+                `[${s.cite_num}] ${s.title}\n来源: ${s.source_name}\n链接: ${s.link_url}\n摘要: ${s.summary}`
+            ).join('\n\n');
+            
+            return {
+                '序号': index + 1,
+                '循环次数': `${conv.loop}/${conv.totalLoops}`,
+                '项目序号': `${conv.itemIndex}/${conv.totalItems}`,
+                '输入内容': conv.input,
+                'AI回复': conv.output,
+                '参考资料': sourcesText || '无',
+                '时间戳': conv.timestamp
+            };
+        });
+        
+        // 创建工作簿
+        const ws = XLSX.utils.json_to_sheet(excelData);
+        
+        // 设置列宽（优化显示）
+        ws['!cols'] = [
+            { wch: 6 },   // 序号
+            { wch: 10 },  // 循环次数
+            { wch: 10 },  // 项目序号
+            { wch: 40 },  // 输入内容
+            { wch: 60 },  // AI回复
+            { wch: 80 },  // 参考资料
+            { wch: 20 }   // 时间戳
+        ];
+        
+        // 创建并下载文件
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "对话记录");
+        
+        const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+        const filename = `对话记录_${timestamp}.xlsx`;
+        
+        XLSX.writeFile(wb, filename);
+        
+        updateStatus(`✅ Excel文件已下载: ${filename}`);
+    } catch (error) {
+        updateStatus(`❌ Excel生成失败: ${error.message}`);
+        alert('Excel生成失败: ' + error.message);
+    }
+});
+
 // 监听来自content script的消息
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.type === 'statusUpdate') {
         updateStatus(message.text);
     } else if (message.type === 'taskComplete') {
         updateStatus('✅ 所有任务已完成！');
-        // 启用下载按钮
+        // 启用两个下载按钮
         if (message.conversations && message.conversations.length > 0) {
             conversationsData = message.conversations;
             downloadBtn.disabled = false;
+            downloadExcelBtn.disabled = false;
             updateStatus(`✅ 任务完成！可下载 ${conversationsData.length} 条对话记录`);
         }
     }

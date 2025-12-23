@@ -2,6 +2,8 @@
 <html>
 <head>
     <meta charset="utf-8">
+    <!-- 引入SheetJS库（关键！） -->
+    <script src="xlsx.full.min.js"></script>
     <style>
         body {
             width: 350px;
@@ -109,9 +111,10 @@
         <button id="stopBtn" class="stop-btn">停止</button>
     </div>
     
-    <!-- 新增下载按钮 -->
+    <!-- 下载按钮组 -->
     <div class="button-group">
         <button id="downloadBtn" class="download-btn" disabled>下载JSON文件</button>
+        <button id="downloadExcelBtn" class="download-btn" disabled>下载Excel文件</button>
     </div>
     
     <div id="status" class="status">等待开始...</div>
