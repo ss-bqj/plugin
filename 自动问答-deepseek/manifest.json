@@ -1,0 +1,34 @@
+{
+    "manifest_version": 3,
+    "name": "自动问答-DeepSeek",
+    "version": "1.0.0",
+    "description": "DeepSeek自动问答插件，支持自动对话、结果导出。目标站点：https://chat.deepseek.com/",
+    
+    "permissions": [
+        "activeTab",
+        "scripting",
+        "storage",
+        "downloads"
+    ],
+    
+    "host_permissions": [
+        "https://chat.deepseek.com/*"
+    ],
+    
+    "action": {
+        "default_popup": "popup.html",
+        "default_title": "DeepSeek自动对话助手"
+    },
+    
+    "background": {
+        "service_worker": "background.js"
+    },
+    
+    "content_scripts": [
+        {
+            "matches": ["https://chat.deepseek.com/*"],
+            "js": ["content.js"],
+            "run_at": "document_idle"
+        }
+    ]
+}
