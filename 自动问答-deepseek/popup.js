@@ -1,4 +1,4 @@
-// popup.js - 与豆包版本基本相同，通用
+// popup.js - DeepSeek自动对话助手
 const itemListTextarea = document.getElementById('itemList');
 const loopCountInput = document.getElementById('loopCount');
 const startBtn = document.getElementById('startBtn');
@@ -185,5 +185,64 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             downloadExcelBtn.disabled = false;
             updateStatus(`✅ 任务完成！可下载 ${conversationsData.length} 条对话记录`);
         }
+    }
+});
+
+// ==================== 打赏功能 ====================
+const donateBtn = document.getElementById('donateBtn');
+const donateModal = document.getElementById('donateModal');
+const donateCompleteBtn = document.getElementById('donateCompleteBtn');
+const donateCancelBtn = document.getElementById('donateCancelBtn');
+
+// 显示打赏模态框
+donateBtn.addEventListener('click', () => {
+    donateModal.style.display = 'flex';
+    
+    // 检查图片加载
+    const wechatImg = document.getElementById('wechatQr');
+    const alipayImg = document.getElementById('alipayQr');
+    
+    wechatImg.onerror = () => {
+        console.error('微信图片加载失败');
+        wechatImg.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgZmlsbD0iI2VlZSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LXNpemU9IjE0IiBmaWxsPSIjOTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+5b2V5LmhPPC90ZXh0Pjwvc3ZnPg==';
+    };
+    
+    alipayImg.onerror = () => {
+        console.error('支付宝图片加载失败');
+        alipayImg.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgZmlsbD0iI2VlZSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LXNpemU9IjE0IiBmaWxsPSIjOTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+6Imv6IWoPzwvdGV4dD48L3N2Zz4=';
+    };
+});
+
+// 关闭打赏模态框
+function closeDonateModal() {
+    donateModal.style.display = 'none';
+}
+
+// 打赏好了
+donateCompleteBtn.addEventListener('click', () => {
+    closeDonateModal();
+    updateStatus('🎉 感谢您的支持！');
+    
+    // 记录打赏时间
+    chrome.storage.local.set({ lastDonateTime: Date.now() });
+});
+
+// 下次一定
+donateCancelBtn.addEventListener('click', () => {
+    closeDonateModal();
+    updateStatus('😊 期待您下次的支持');
+});
+
+// 点击模态框外部关闭
+donateModal.addEventListener('click', (e) => {
+    if (e.target === donateModal) {
+        closeDonateModal();
+    }
+});
+
+// ESC键关闭
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && donateModal.style.display === 'flex') {
+        closeDonateModal();
     }
 });
