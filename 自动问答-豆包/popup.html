@@ -2,7 +2,6 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <!-- 引入SheetJS库（关键！） -->
     <script src="xlsx.full.min.js"></script>
     <style>
         body {
@@ -39,6 +38,7 @@
             padding: 8px;
             border: 1px solid #ddd;
             border-radius: 4px;
+            box-sizing: border-box;
         }
         .button-group {
             display: flex;
@@ -47,13 +47,14 @@
         }
         button {
             flex: 1;
-            padding: 8px 12px;
+            padding: 10px 12px;  /* 🔥 统一增加到10px，确保高度一致 */
             border: none;
             border-radius: 4px;
             cursor: pointer;
             font-size: 12px;
             font-weight: 600;
             transition: all 0.2s;
+            box-sizing: border-box; /* 🔥 防止padding影响宽度计算 */
         }
         .start-btn {
             background: #4CAF50;
@@ -88,8 +89,129 @@
             font-size: 11px;
             color: #666;
         }
-        .item-input {
+
+        /* 🔥 关键修改1：标签网格布局 */
+        .grid-labels {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 5px;
+        }
+        
+        /* 🔥 关键修改2：内容网格布局 */
+        .grid-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        
+        /* 🔥 关键修改3：输入框样式 */
+        .grid-input {
+            grid-column: 1;
+            grid-row: 1;
+            width: 100%;
+        }
+        
+        /* 🔥 关键修改4：按钮直接作为网格项 */
+        .grid-start {
+            grid-column: 1;
+            grid-row: 2;
+        }
+        .grid-json {
+            grid-column: 1;
+            grid-row: 3;
+        }
+        .grid-donate {
+            grid-column: 2;
+            grid-row: 1;
+        }
+        .grid-stop {
+            grid-column: 2;
+            grid-row: 2;
+        }
+        .grid-excel {
+            grid-column: 2;
+            grid-row: 3;
+        }
+
+        /* 打赏按钮样式 */
+        #donateBtn {
+            background: linear-gradient(135deg, #ff6b6b, #ffa500);
+            color: white;
+            width: 100%;
+        }
+
+        /* 模态框样式 */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            width: 320px;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header h3 {
+            margin: 0 0 15px 0;
+            text-align: center;
+            color: #333;
+            font-size: 18px;
+        }
+
+        .donate-text {
+            text-align: center;
+            color: #666;
+            margin: 10px 0 20px 0;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .qr-code-container {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+
+        .qr-code {
+            text-align: center;
+        }
+
+        .qr-code img {
+            width: 120px;
+            height: 120px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
             margin-bottom: 8px;
+        }
+
+        .qr-code p {
+            margin: 0;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 10px;
+        }
+
+        .modal-footer button {
+            flex: 1;
+            padding: 10px;
+            font-size: 13px;
         }
     </style>
 </head>
@@ -101,23 +223,49 @@
         <textarea id="itemList" placeholder="想买 AI 眼镜，应该怎么选？哪几个产品最值得买？&#10;不同品牌的 AI 眼镜体验差异在哪里？"></textarea>
     </div>
     
-    <div class="input-group">
+    <!-- 标签行（可选） -->
+    <div class="grid-labels">
         <label>循环次数</label>
-        <input type="number" id="loopCount" value="1" min="1" max="99">
+        <label></label>
     </div>
     
-    <div class="button-group">
-        <button id="startBtn" class="start-btn">开始执行</button>
-        <button id="stopBtn" class="stop-btn">停止</button>
-    </div>
-    
-    <!-- 下载按钮组 -->
-    <div class="button-group">
-        <button id="downloadBtn" class="download-btn" disabled>下载JSON文件</button>
-        <button id="downloadExcelBtn" class="download-btn" disabled>下载Excel文件</button>
+    <!-- 内容网格 -->
+    <div class="grid-content">
+        <input type="number" id="loopCount" class="grid-input" value="1" min="1" max="99">
+        <button id="startBtn" class="grid-start start-btn">开始执行</button>
+        <button id="downloadBtn" class="grid-json download-btn" disabled>下载JSON文件</button>
+        <button id="donateBtn" class="grid-donate download-btn">☕ 打赏支持</button>
+        <button id="stopBtn" class="grid-stop stop-btn">停止</button>
+        <button id="downloadExcelBtn" class="grid-excel download-btn" disabled>下载Excel文件</button>
     </div>
     
     <div id="status" class="status">等待开始...</div>
+    
+    <!-- 打赏模态框 -->
+    <div id="donateModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>感谢支持 ☕</h3>
+            </div>
+            <div class="modal-body">
+                <p class="donate-text">谢谢你的咖啡钱</p>
+                <div class="qr-code-container">
+                    <div class="qr-code">
+                        <img src="images/wechat.JPG" alt="微信收款码" id="wechatQr">
+                        <p>微信</p>
+                    </div>
+                    <div class="qr-code">
+                        <img src="images/alipay.JPG" alt="支付宝收款码" id="alipayQr">
+                        <p>支付宝</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="donateCompleteBtn" class="start-btn">打赏好了</button>
+                <button id="donateCancelBtn" class="stop-btn">下次一定</button>
+            </div>
+        </div>
+    </div>
     
     <script src="popup.js"></script>
 </body>

@@ -132,7 +132,7 @@ downloadExcelBtn.addEventListener('click', async () => {
             // 处理参考资料，转换为文本
             const sources = conv.source_entity || [];
             const sourcesText = sources.map(s => 
-                `[${s.cite_num}] ${s.title}\n来源: ${s.source_name}\n链接: ${s.link_url}\n摘要: ${s.summary}`
+                `${s.title}\n来源: ${s.source_name}\n链接: ${s.link_url}`
             ).join('\n\n');
             
             return {
@@ -156,7 +156,7 @@ downloadExcelBtn.addEventListener('click', async () => {
             { wch: 10 },  // 项目序号
             { wch: 40 },  // 输入内容
             { wch: 60 },  // AI回复
-            { wch: 80 },  // 参考资料
+            { wch: 50 },  // 参考资料
             { wch: 20 }   // 时间戳
         ];
         
@@ -189,5 +189,74 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             downloadExcelBtn.disabled = false;
             updateStatus(`✅ 任务完成！可下载 ${conversationsData.length} 条对话记录`);
         }
+    }
+});
+
+// ==================== 打赏功能 ====================
+// 获取打赏相关元素
+const donateBtn = document.getElementById('donateBtn');
+const donateModal = document.getElementById('donateModal');
+const donateCompleteBtn = document.getElementById('donateCompleteBtn');
+const donateCancelBtn = document.getElementById('donateCancelBtn');
+
+// 检查元素是否存在（调试用）
+console.log('✅ 打赏按钮:', donateBtn);
+console.log('✅ 模态框:', donateModal);
+console.log('✅ 打赏好了按钮:', donateCompleteBtn);
+console.log('✅ 下次一定按钮:', donateCancelBtn);
+
+// 显示打赏模态框
+donateBtn.addEventListener('click', () => {
+    console.log('🎉 点击了打赏按钮'); // 调试日志
+    donateModal.style.display = 'flex';
+    
+    // 检查图片加载
+    const wechatImg = document.getElementById('wechatQr');
+    const alipayImg = document.getElementById('alipayQr');
+    
+    wechatImg.onerror = () => {
+        console.error('微信图片加载失败');
+        wechatImg.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgZmlsbD0iI2VlZSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LXNpemU9IjE0IiBmaWxsPSIjOTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+5b2V5LmhPPC90ZXh0Pjwvc3ZnPg==';
+    };
+    
+    alipayImg.onerror = () => {
+        console.error('支付宝图片加载失败');
+        alipayImg.src = 'data/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgZmlsbD0iI2VlZSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LXNpemU9IjE0IiBmaWxsPSIjOTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+6Imv6IWoPzwvdGV4dD48L3N2Zz4=';
+    };
+});
+
+// 关闭打赏模态框
+function closeDonateModal() {
+    donateModal.style.display = 'none';
+}
+
+// 打赏好了
+donateCompleteBtn.addEventListener('click', () => {
+    console.log('✅ 用户点击了"打赏好了"');
+    closeDonateModal();
+    updateStatus('🎉 感谢您的支持！');
+    
+    // 记录打赏时间
+    chrome.storage.local.set({ lastDonateTime: Date.now() });
+});
+
+// 下次一定
+donateCancelBtn.addEventListener('click', () => {
+    console.log('❌ 用户点击了"下次一定"');
+    closeDonateModal();
+    updateStatus('😊 期待您下次的支持');
+});
+
+// 点击模态框外部关闭
+donateModal.addEventListener('click', (e) => {
+    if (e.target === donateModal) {
+        closeDonateModal();
+    }
+});
+
+// ESC键关闭
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && donateModal.style.display === 'flex') {
+        closeDonateModal();
     }
 });
