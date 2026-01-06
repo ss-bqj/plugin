@@ -139,7 +139,9 @@ async function getReferenceSources() {
     try {
         // 1. 等待参考资料按钮出现
         updateStatus('正在查找参考资料按钮...');
-        const refButton = await waitForElement('span.entry-btn-title-a8ozJq.entry-btn-title', 8000);
+        // const refButton = await waitForElement('span.entry-btn-title-a8ozJq.entry-btn-title', 8000);
+        const refButton = await waitForElement('span.entry-btn-title-v3-uM2642', 8000);
+
         
         if (!refButton) {
             updateStatus('⚠️ 未找到参考资料按钮，跳过');
@@ -153,7 +155,7 @@ async function getReferenceSources() {
         updateStatus('✓ 已打开参考资料面板');
         
         // 3. 等待面板完全渲染
-        await sleep(3000);
+        await sleep(5000);
         
         // 4. 直接查找所有资料链接（你给的精确class！）
         const linkElements = document.querySelectorAll('a.search-lIUYwC[href^="http"]');
