@@ -1,0 +1,176 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  width: 360px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  overflow: hidden; /* 防止滚动 */
+}
+
+.container {
+  padding: 12px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px; /* 减小模块间距 */
+}
+
+/* 头部样式 - 更紧凑 */
+.header {
+  text-align: center;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+}
+
+.today {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 2px;
+}
+
+.lunar {
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.weekday {
+  font-size: 11px;
+  opacity: 0.8;
+}
+
+/* 主倒计时区域 - 减小内边距 */
+.main-countdown {
+  text-align: center;
+  padding: 12px 0;
+  background: rgba(255,255,255,0.1);
+  border-radius: 10px;
+  backdrop-filter: blur(10px);
+}
+
+.holiday-name {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 4px;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.holiday-date {
+  font-size: 12px;
+  opacity: 0.9;
+  margin-bottom: 12px;
+}
+
+.countdown-display {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.time-unit {
+  background: rgba(255,255,255,0.2);
+  padding: 6px 8px;
+  border-radius: 6px;
+  min-width: 50px;
+}
+
+.time-unit .number {
+  display: block;
+  font-size: 22px;
+  font-weight: bold;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.time-unit .label {
+  font-size: 11px;
+  opacity: 0.8;
+  margin-top: 2px;
+  display: block;
+}
+
+/* 更多节日列表 - 更紧凑 */
+.more-holidays {
+  background: rgba(255,255,255,0.95);
+  color: #333;
+  border-radius: 10px;
+  padding: 10px;
+  flex: 1;
+}
+
+.more-holidays h3 {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #eee;
+}
+
+.more-holidays ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px; /* 列表项间距 */
+}
+
+.more-holidays li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 13px;
+}
+
+.more-holidays li:last-child {
+  border-bottom: none;
+}
+
+.holiday-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.holiday-name-small {
+  font-weight: 500;
+  color: #333;
+  font-size: 13px;
+}
+
+.holiday-date-small {
+  font-size: 11px;
+  color: #999;
+}
+
+.days-left {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* 底部 - 更紧凑 */
+.footer {
+  text-align: center;
+  font-size: 11px;
+  opacity: 0.8;
+  padding-top: 4px;
+}
+
+/* 动画效果 */
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
+
+.holiday-name {
+  animation: pulse 2s infinite;
+}

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>节日倒计时</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <!-- 头部日期信息 -->
+    <div class="header">
+      <div class="today" id="today-date">加载中...</div>
+      <div class="lunar" id="lunar-date">--</div>
+      <div class="weekday" id="weekday">--</div>
+    </div>
+
+    <!-- 主倒计时区域 -->
+    <div class="main-countdown">
+      <div class="holiday-name" id="next-holiday">正在计算...</div>
+      <div class="holiday-date" id="holiday-date">--</div>
+      <div class="countdown-display">
+        <div class="time-unit">
+          <span class="number" id="days">00</span>
+          <span class="label">天</span>
+        </div>
+        <div class="time-unit">
+          <span class="number" id="hours">00</span>
+          <span class="label">时</span>
+        </div>
+        <div class="time-unit">
+          <span class="number" id="minutes">00</span>
+          <span class="label">分</span>
+        </div>
+        <div class="time-unit">
+          <span class="number" id="seconds">00</span>
+          <span class="label">秒</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 更多节日列表 -->
+    <div class="more-holidays">
+      <h3>即将到来的节日</h3>
+      <ul id="holiday-list">
+        <!-- 动态生成 -->
+      </ul>
+    </div>
+
+    <!-- 底部信息 -->
+    <div class="footer">
+      <span id="current-time">--:--:--</span>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

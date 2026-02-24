@@ -1,0 +1,10 @@
+{
+  "manifest_version": 3,
+  "name": "节日倒计时",
+  "version": "1.0.0",
+  "description": "显示中国传统节日倒计时",
+  "permissions": [],
+  "action": {
+    "default_popup": "popup.html"
+  }
+}
