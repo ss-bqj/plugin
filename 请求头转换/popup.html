@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    html, body {
+      width: 700px;
+      height: 480px;
+      min-width: 700px;
+      min-height: 480px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      background: #f5f5f5;
+      overflow: hidden;
+    }
+    
+    .container {
+      display: flex;
+      flex-direction: column;
+      width: 700px;
+      height: 520px;
+    }
+    
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 10px 20px;
+      flex-shrink: 0;
+    }
+    
+    .header h1 { font-size: 16px; margin-bottom: 2px; }
+    .header p { font-size: 11px; opacity: 0.9; }
+    
+    .main {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+    }
+    
+    .panel {
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+    
+    .panel-left { background: white; border-right: 1px solid #e0e0e0; }
+    
+    .panel-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #555;
+      margin-bottom: 6px;
+      flex-shrink: 0;
+    }
+    
+    .toolbar {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 6px;
+      flex-shrink: 0;
+    }
+    
+    .btn {
+      padding: 5px 12px;
+      border: none;
+      border-radius: 4px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-weight: 500;
+    }
+    
+    .btn-primary { background: #667eea; color: white; }
+    .btn-primary:hover { background: #5a6fd6; }
+    .btn-secondary { background: #f0f0f0; color: #555; }
+    .btn-secondary:hover { background: #e0e0e0; }
+    .btn-success { background: #10b981; color: white; }
+    .btn-success:hover { background: #059669; }
+    
+    textarea, .output-area {
+      flex: 1;
+      min-height: 0;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      padding: 10px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 11px;
+      line-height: 1.4;
+      overflow-y: auto;
+      overflow-x: hidden;
+      word-wrap: break-word;
+      white-space: pre-wrap;
+    }
+    
+    textarea { resize: none; transition: border-color 0.3s; }
+    textarea:focus { outline: none; border-color: #667eea; }
+    
+    .output-area { background: #1e1e1e; color: #d4d4d4; }
+    
+    .status {
+      position: fixed;
+      bottom: 45px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 8px 20px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 500;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+      z-index: 100;
+    }
+    
+    .status.show { opacity: 1; }
+    .status.success { background: #d1fae5; color: #065f46; }
+    .status.error { background: #fee2e2; color: #991b1b; }
+    
+    .footer {
+      padding: 6px 20px;
+      flex-shrink: 0;
+      background: white;
+      border-top: 1px solid #e0e0e0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      color: #999;
+    }
+    
+    .shortcut {
+      background: #f0f0f0;
+      padding: 1px 4px;
+      border-radius: 3px;
+      font-family: monospace;
+      font-size: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Headers 转字典</h1>
+      <p>粘贴浏览器开发者工具的 Request Headers，自动转换</p>
+    </div>
+    
+    <div class="main">
+      <div class="panel panel-left">
+        <div class="panel-label">📋 粘贴 Headers</div>
+        <div class="toolbar">
+          <button class="btn btn-primary" id="btnConvert">转换</button>
+          <button class="btn btn-secondary" id="btnClear">清空</button>
+          <button class="btn btn-secondary" id="btnExample">示例</button>
+        </div>
+        <textarea id="input" placeholder="粘贴 Headers 到这里..."></textarea>
+      </div>
+      
+      <div class="panel">
+        <div class="panel-label">🐍 Python 字典</div>
+        <div class="toolbar">
+          <button class="btn btn-success" id="btnCopy">复制</button>
+          <button class="btn btn-secondary" id="btnDownload">下载</button>
+        </div>
+        <div class="output-area" id="output">等待转换...</div>
+      </div>
+    </div>
+    
+    <div class="footer">
+      快捷键: <span class="shortcut">Ctrl+Shift+H</span> 打开 | <span class="shortcut">Ctrl+Enter</span> 转换 | <span class="shortcut">Ctrl+C</span> 复制
+    </div>
+  </div>
+  
+  <div class="status" id="status"></div>
+  
+  <script src="popup.js"></script>
+</body>
+</html>

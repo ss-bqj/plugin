@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "Headers 转字典工具",
+  "version": "1.2.0",
+  "description": "将浏览器开发者工具中的 HTTP Headers 一键转换为 Python 字典格式",
+  "permissions": [
+    "clipboardRead",
+    "clipboardWrite",
+    "storage",
+    "activeTab"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "点击打开 Headers 转字典工具"
+  },
+  "commands": {
+    "_execute_action": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+H",
+        "mac": "Command+Shift+H"
+      },
+      "description": "打开 Headers 转字典工具"
+    }
+  }
+}
