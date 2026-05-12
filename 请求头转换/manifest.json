@@ -13,7 +13,17 @@
     "service_worker": "background.js"
   },
   "action": {
-    "default_title": "点击打开 Headers 转字典工具"
+    "default_title": "点击打开 Headers 转字典工具",
+    "default_icon": {
+      "16": "icon16.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
   },
   "commands": {
     "_execute_action": {
